@@ -52,30 +52,30 @@ namespace JobService.Service
 
             services.AddMassTransit(x =>
             {
-                x.AddRabbitMqMessageScheduler();
+                x.AddDelayedMessageScheduler();
 
                 x.AddConsumer<ConvertVideoJobConsumer>(typeof(ConvertVideoJobConsumerDefinition));
 
                 x.AddConsumer<VideoConvertedConsumer>();
 
-                x.AddSagaRepository<JobSaga>()
-                    .EntityFrameworkRepository(r =>
-                    {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
-                    });
-                x.AddSagaRepository<JobTypeSaga>()
-                    .EntityFrameworkRepository(r =>
-                    {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
-                    });
-                x.AddSagaRepository<JobAttemptSaga>()
-                    .EntityFrameworkRepository(r =>
-                    {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
-                    });
+                //x.AddSagaRepository<JobSaga>()
+                //    .EntityFrameworkRepository(r =>
+                //    {
+                //        r.ExistingDbContext<JobServiceSagaDbContext>();
+                //        r.LockStatementProvider = new PostgresLockStatementProvider();
+                //    });
+                //x.AddSagaRepository<JobTypeSaga>()
+                //    .EntityFrameworkRepository(r =>
+                //    {
+                //        r.ExistingDbContext<JobServiceSagaDbContext>();
+                //        r.LockStatementProvider = new PostgresLockStatementProvider();
+                //    });
+                //x.AddSagaRepository<JobAttemptSaga>()
+                //    .EntityFrameworkRepository(r =>
+                //    {
+                //        r.ExistingDbContext<JobServiceSagaDbContext>();
+                //        r.LockStatementProvider = new PostgresLockStatementProvider();
+                //    });
 
                 x.AddServiceClient();
 
@@ -85,10 +85,13 @@ namespace JobService.Service
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    if (IsRunningInContainer)
-                        cfg.Host("rabbitmq");
+                    cfg.Host(new Uri("amqp://localhost:5672/"), h =>
+                    {
+                        h.Username("guest");
+                        h.Password("guest");
+                    });
 
-                    cfg.UseRabbitMqMessageScheduler();
+                    cfg.UseDelayedMessageScheduler();
 
                     var options = new ServiceInstanceOptions()
                         .EnableInstanceEndpoint()
@@ -101,7 +104,7 @@ namespace JobService.Service
                             js.SagaPartitionCount = 1;
                             js.FinalizeCompleted = true;
 
-                            js.ConfigureSagaRepositories(context);
+                            //js.ConfigureSagaRepositories(context);
                         });
 
                         instance.ConfigureEndpoints(context);
