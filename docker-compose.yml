@@ -1,22 +1,22 @@
-﻿version: "3.6"
+version: '3.4'
+
 services:
   rabbitmq:
     image: masstransit/rabbitmq:latest
     ports:
       - "5672:5672"
       - "15672:15672"
-  postgres:
-    image: "postgres:9.6"
-    environment:
-      - "POSTGRES_PASSWORD=Password12!"
-    ports:
-      - 5432:5432
-  service:
-    image: jobservice/service
+  #postgres:
+  #  image: "postgres:9.6"
+  #  environment:
+  #    - "POSTGRES_PASSWORD=Password12!"
+  #  ports:
+  #    - 5432:5432
+  jobservice.service:
+    image: ${DOCKER_REGISTRY-}jobserviceservice
     build:
-      context: ./src
-      dockerfile: Dockerfile.service
-    restart: always      
+      context: .
+      dockerfile: src/JobService.Service/Dockerfile
     ports:
      - "5000:80"
-     - "5001:81"
+     - "5001:443"

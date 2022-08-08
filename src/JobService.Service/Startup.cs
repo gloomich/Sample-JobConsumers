@@ -85,11 +85,7 @@ namespace JobService.Service
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(new Uri("amqp://localhost:5672/"), h =>
-                    {
-                        h.Username("guest");
-                        h.Password("guest");
-                    });
+                    cfg.Host("rabbitmq");
 
                     cfg.UseDelayedMessageScheduler();
 
